@@ -18,24 +18,49 @@ const priorities = [
 
 const bubbles = priorities.map((p, i) => ({
   text: p,
-  x: Math.cos(i) * 300,
-  y: Math.sin(i) * 300,
-  size: 50 + Math.random() * 20
+  x: Math.cos(i * 0.6) * 400,
+  y: Math.sin(i * 0.6) * 400,
+  size: 60 + Math.random() * 30,
+  color: `hsl(${Math.random() * 360}, 100%, 65%)`
 }));
+
+function drawStarfield() {
+  for (let i = 0; i < 150; i++) {
+    const x = Math.random() * width;
+    const y = Math.random() * height;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.beginPath();
+    ctx.arc(x, y, Math.random() * 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
 
 function draw() {
   ctx.clearRect(0, 0, width, height);
+
+  // background space glow
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, width, height);
+  drawStarfield();
+
   ctx.save();
   ctx.translate(width / 2 + offsetX, height / 2 + offsetY);
   ctx.scale(zoom, zoom);
 
   for (const b of bubbles) {
+    // glow
+    ctx.shadowBlur = 25;
+    ctx.shadowColor = b.color;
+
+    // planet
     ctx.beginPath();
-    ctx.fillStyle = "#00ffd5";
+    ctx.fillStyle = b.color;
     ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#000";
+    // label
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#fff";
     ctx.font = "bold 16px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(b.text, b.x, b.y + 5);
@@ -52,11 +77,12 @@ window.addEventListener("resize", () => {
   height = canvas.height = window.innerHeight;
 });
 
-// Zoom with scroll
+// Scroll to zoom
 canvas.addEventListener("wheel", (e) => {
   e.preventDefault();
   const delta = e.deltaY > 0 ? 0.9 : 1.1;
   zoom *= delta;
+  zoom = Math.min(Math.max(zoom, 0.3), 5);
 });
 
 // Drag to pan
@@ -64,7 +90,6 @@ canvas.addEventListener("mousedown", (e) => {
   isDragging = true;
   dragStart = { x: e.clientX, y: e.clientY };
 });
-
 canvas.addEventListener("mousemove", (e) => {
   if (isDragging) {
     offsetX += e.clientX - dragStart.x;
@@ -72,7 +97,5 @@ canvas.addEventListener("mousemove", (e) => {
     dragStart = { x: e.clientX, y: e.clientY };
   }
 });
-
 canvas.addEventListener("mouseup", () => isDragging = false);
 canvas.addEventListener("mouseleave", () => isDragging = false);
-
