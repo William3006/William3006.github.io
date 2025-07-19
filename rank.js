@@ -1,38 +1,17 @@
-const list = document.getElementById("priorityList");
-let draggedItem;
+const items = document.querySelectorAll("#items li");
+let dragged = null;
 
-list.addEventListener("dragstart", (e) => {
-  draggedItem = e.target;
-});
-
-list.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  const afterElement = getDragAfterElement(list, e.clientY);
-  if (afterElement == null) {
-    list.appendChild(draggedItem);
-  } else {
-    list.insertBefore(draggedItem, afterElement);
-  }
-});
-
-function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll("li:not(.dragging)")];
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
+items.forEach(item => {
+  item.addEventListener("dragstart", () => dragged = item);
+  item.addEventListener("dragover", e => e.preventDefault());
+  item.addEventListener("drop", e => {
+    e.preventDefault();
+    if (dragged !== item) {
+      let siblings = [...items];
+      let from = siblings.indexOf(dragged);
+      let to = siblings.indexOf(item);
+      if (from < to) item.after(dragged);
+      else item.before(dragged);
     }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-// 🔥 Save to localStorage when navigating to compare page
-const compareLink = document.querySelector(".nav[href='compare.html']");
-if (compareLink) {
-  compareLink.addEventListener("click", () => {
-    const order = [...list.querySelectorAll("li")].map(li => li.textContent);
-    localStorage.setItem("userPriorities", JSON.stringify(order));
   });
-}
+});
