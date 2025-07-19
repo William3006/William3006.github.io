@@ -1,8 +1,8 @@
-#universe {
+canvas {
+  display: block;
   position: fixed;
   top: 0;
   left: 0;
-  background: radial-gradient(ellipse at center, #111, #000 90%);
-  display: block;
+  background: #000;
   z-index: -1;
 }
